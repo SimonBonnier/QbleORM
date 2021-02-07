@@ -1,4 +1,4 @@
-import { Client } from "https://deno.land/x/postgres@v0.4.6/mod.ts";
+import { DBClient } from "./dbClient.ts";
 
 export interface IQueryable<T> {
     filter<T>(predicate: (type: T) => boolean): IQueryable<T>;
@@ -8,9 +8,9 @@ export interface IQueryable<T> {
 export class PostgresQueryable<T> implements IQueryable<T> {
     private type : new () => T;
     private sql: string;
-    private client: Client;
+    private client: DBClient;
     
-    constructor(type: new () => T, client: Client) {
+    constructor(type: new () => T, client: DBClient) {
         this.type = type;
         this.sql = `SELECT * FROM ${this.type.name} as ${this.type.name}`;
         this.client = client;
@@ -29,17 +29,15 @@ export class PostgresQueryable<T> implements IQueryable<T> {
 
         // Handle Sending In Function
         
-
-        
         console.log('function', predicate.toString());
         console.log('sql', this.sql);
         return this;
     }
 
     async execute() : Promise<Array<any>> {
-        await this.client.connect();
-        let result = await this.client.query(this.sql);
-        await this.client.end()
+        await this.client.connectAsync();
+        let result = await this.client.queryAsync(this.sql);
+        await this.client.endAsync()
         return result.rows;
     }
 

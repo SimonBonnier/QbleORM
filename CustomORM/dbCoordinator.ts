@@ -1,17 +1,17 @@
-import { Client } from "https://deno.land/x/postgres@v0.4.6/mod.ts";
 import { IQueryable, PostgresQueryable } from "./queryable.ts";
 import { People } from '../TestDb/people.ts';
 import { ClientOptions } from './clientOption.ts';
-// import { Client } from "https://deno.land/x/postgres/mod.ts";
+import { ClientFactory, ClientType } from './clientFactory.ts'
+import { DBClient } from "./dbClient.ts";
 
 export class DBCoordinator {
-    protected client : Client;
+    protected client : DBClient;
 
-    public constructor(client: Client) {
+    public constructor(client: DBClient) {
         this.client = client;
     }
 
-    static CreateFromClient<T extends DBCoordinator>(type: (new (client: Client) => T), client: Client) : T {
+    static CreateFromClient<T extends DBCoordinator>(type: (new (client: DBClient) => T), client: DBClient) : T {
         return new type(client);
     }
 
@@ -43,15 +43,15 @@ export class DBCoordinator {
         if(!clientOptions.isValid())
             throw new Error("Invalid ConnectionString " + connectionString);
             
-
-        const client = new Client(clientOptions);
+        const client = ClientFactory.create(ClientType.POSTGRES, clientOptions);
+        // const client = new Client(clientOptions);
         return new DBCoordinator(client);
     }
 }
 
 export class TestDBCoordinator extends DBCoordinator {
 
-    constructor(client: Client) {
+    constructor(client: DBClient) {
         super(client);
     }
     people: IQueryable<People> = new PostgresQueryable<People>(People, this.client)

@@ -1,19 +1,19 @@
-import { Client } from "https://deno.land/x/postgres@v0.4.6/mod.ts";
-// import { Client } from "https://deno.land/x/postgres/mod.ts";
-
 import { DBInitializer } from './TestDb/testDbInitializer.ts';
 import { TestDBCoordinator } from './CustomORM/dbCoordinator.ts';
 import { People } from "./TestDb/people.ts";
+import { DBClient, PostgresDBClient } from "./CustomORM/dbClient.ts";
+import { ClientOptions } from "./CustomORM/clientOption.ts";
 
 
-function getClient(): Client {
-  return new Client({
-    user: "testDB",
-    password: "testDB",
-    database: "testDB",
-    hostname: "localhost",
-    port: 5432
-  });
+function getClient(): DBClient {
+  const options = new ClientOptions();
+  options.user = "testDB";
+  options.password = "testDB";
+  options.database = "testDB";
+  options.hostname = "localhost";
+  options.port = 5432;
+
+  return new PostgresDBClient(options);
 }
 
 async function main() {

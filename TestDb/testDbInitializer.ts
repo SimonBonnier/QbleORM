@@ -1,16 +1,15 @@
-import { Client } from "https://deno.land/x/postgres@v0.4.6/mod.ts";
-// import { Client } from "https://deno.land/x/postgres/mod.ts";
+import { DBClient } from "../CustomORM/dbClient.ts";
 
 export class DBInitializer {
-    private client: Client;
+    private client: DBClient;
 
-    constructor(client: Client) {
+    constructor(client: DBClient) {
         this.client = client;
     }
 
     initDBIfNotExitst = async () => {
-        await this.client.connect();
-        const result = await this.client.query(`SELECT EXISTS 
+        await this.client.connectAsync();
+        const result = await this.client.queryAsync(`SELECT EXISTS 
                                       (
                                         SELECT 1
                                         FROM information_schema.tables 
@@ -18,28 +17,30 @@ export class DBInitializer {
                                         AND table_name = 'people'
                                       );
                                     `);
+                                    console.log('HELLO')
+        await this.logPeople();
   
         if(result.rows[0][0] === true) {
             return;
         }
         
-        await this.client.query(`CREATE TABLE people (
+        await this.client.queryAsync(`CREATE TABLE people (
                                 id integer NOT NULL, 
                                 firstname text NOT NULL
                                 )`);
 
-        await this.client.query(
+        await this.client.queryAsync(
             `INSERT INTO people(id, firstname) VALUES (1, 'Simon'); 
             INSERT INTO people(id, firstname) VALUES (2, 'Lisa'); 
             INSERT INTO people(id, firstname) VALUES (3, 'Fredrik'); 
             INSERT INTO people(id, firstname) VALUES (4, 'Ove'); 
             `);
 
-        await this.client.end();
-    }
+        await this.client.endAsync();
+}
 
     logPeople = async () => {
-        const result2 = await this.client.query("SELECT * FROM people;");
+        const result2 = await this.client.queryAsync("SELECT * FROM people;");
         console.log('rows', result2.rows)
     }
 }

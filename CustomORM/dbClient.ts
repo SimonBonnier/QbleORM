@@ -3,8 +3,8 @@ import { ClientOptions } from "./clientOption.ts";
 
 export interface DBClient {
     queryAsync(sql: string): Promise<any> // TODO Fix any
-    endAsync(): void;
-    connectAsync(): void;
+    endAsync(): Promise<void>;
+    connectAsync(): Promise<void>;
 }
 
 export class PostgresDBClient extends Client implements DBClient {
@@ -12,15 +12,15 @@ export class PostgresDBClient extends Client implements DBClient {
         super(options);
     }
 
-    connectAsync() {
-        this.connect();
+    async connectAsync() {
+        await this.connect();
     }
 
-    endAsync() {
-        this.end();
+    async endAsync() {
+        await this.end();
     }
 
-    queryAsync(sql: string) {
-        return this.query(sql);
+    async queryAsync(sql: string) {
+        return await this.query(sql);
     }
 }
